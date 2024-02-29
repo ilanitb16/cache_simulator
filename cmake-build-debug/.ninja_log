@@ -1,0 +1,4 @@
+# ninja log v5
+0	86	1709218588570002668	CMakeFiles/cache_simulation.dir/cache.c.o	dbc0606470f71602
+89	105	1709218588590003012	CMakeFiles/cache_simulation.dir/main.c.o	645dac48b84729
+105	126	1709218588610003355	cache_simulation	4e8b27d543367cc
