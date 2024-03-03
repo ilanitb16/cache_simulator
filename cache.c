@@ -4,7 +4,6 @@
 
 #include <limits.h>
 
-
 cache_t initialize_cache(uchar sets_exponent, uchar tag_length, uchar blocks_exponent, uchar E) {
     cache_t cache;
     cache.s = sets_exponent;
@@ -99,15 +98,6 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
         if (cache_line[i].valid && cache_line[i].tag == tag) {
             // Cache hit
             uchar cached_data = cache_line[i].block[off % (1 << cache.b)];
-            uchar expected_data = start[off]; // Data expected from memory
-
-            // Compare the data from cache with expected data from memory
-            if (cached_data != expected_data) {
-                // Data in cache doesn't match the expected data
-                // Update the cache block with the correct data from memory
-                cache_line[i].block[off % (1 << cache.b)] = expected_data;
-            }
-
             cache_line[i].frequency++;
 
             // Return the data from the cache
@@ -117,6 +107,7 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
 
     // If we got here we have a cache miss and have to handle it using LFU method.
     uchar data = start[off]; // Fetch the data from start (memory)
+    uchar data2 = start[off + 1];
 
     // cold miss
     if ( 0 == check_cold_miss(cache_line, cache.E)) {
@@ -128,15 +119,16 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
                 cache_line[i].tag = tag;
                 cache_line[i].block = (uchar *) malloc((1 << cache.b) * sizeof(uchar));
                 cache_line[i].block[off % (1 << cache.b)] = data;
+                cache_line[i].block[(off + 1) % (1 << cache.b)] = data2;
                 return data; // Return the fetched data
             }
         }
     }
 
     update_lfu(cache_line, cache.E, tag, off, data, cache.b); // Update cache using LFU method
+    update_lfu(cache_line, cache.E, tag, off + 1, data2, cache.b);
 
     return data;
-
 }
 
 void write_byte(cache_t cache, uchar* start, long int off, uchar new) {
@@ -148,25 +140,14 @@ void write_byte(cache_t cache, uchar* start, long int off, uchar new) {
 
     // Search for the cache line matching the index
     cache_line_t* cache_line = cache.cache[index];
-
-    // Check if the data is already in the cache
     for (int i = 0; i < cache.E; i++) {
         // If cache line is valid and its tag matches the extracted tag
         if (cache_line[i].valid && cache_line[i].tag == tag) {
             // Cache hit
-            uchar cached_data = cache_line[i].block[off % (1 << cache.b)];
-            uchar expected_data = start[off]; // Data expected from memory
-
-            // Compare the data from cache with expected data from memory
-            if (cached_data != expected_data) {
-                // Data in cache doesn't match the expected data
-                // Update the cache block with the correct data from memory
-                cache_line[i].block[off % (1 << cache.b)] = expected_data;
-            }
-
             cache_line[i].frequency++;
 
-            // Return the data from the cache
+            // Update the data in memory
+            start[off] = new;
             return;
         }
     }
@@ -198,14 +179,14 @@ void print_cache(cache_t cache) {
 
 int main (){
     // data
-//    uchar arr[] = {1, 2, 3, 4, 5, 6, 7, 8};
-//    cache_t cache = initialize_cache(1, 1, 1, 2);
-//    read_byte(cache, arr, 0);
-//    read_byte(cache, arr, 1);
-//    read_byte(cache, arr, 2);
-//    read_byte(cache, arr, 6);
-//    read_byte(cache, arr, 7);
-//    print_cache(cache);
+    uchar arr[] = {1, 2, 3, 4, 5, 6, 7, 8};
+    cache_t cache = initialize_cache(1, 1, 1, 2);
+    read_byte(cache, arr, 0);
+    read_byte(cache, arr, 1);
+    read_byte(cache, arr, 2);
+    read_byte(cache, arr, 6);
+    read_byte(cache, arr, 7);
+    print_cache(cache);
 
 //    int n;
 //     printf("Size of data: ");
@@ -231,32 +212,32 @@ int main (){
 //
 //     free(mem);
 
-    int n;
-    printf("Size of data: ");
-    scanf("%d", &n);
-    uchar* mem = malloc(n);
-
-    printf("Input data >> ");
-    for (int i = 0; i < n; i++)
-        scanf("%hhd", mem + i);
-
-    int s, t, b, E;
-    printf("s t b E: ");
-    scanf("%d %d %d %d", &s, &t, &b, &E);
-
-    cache_t cache = initialize_cache(s, t, b, E);
-
-    // Perform write operations
-    while (1) {
-        scanf("%d", &n);
-        if (n < 0) break;
-        write_byte(cache, mem, n, 10); // Write the value 10 at memory address n
-    }
-
-    printf("\nCache after write operations:\n");
-    print_cache(cache);
-
-    free(mem);
-    return 0;
+//    int n;
+//    printf("Size of data: ");
+//    scanf("%d", &n);
+//    uchar* mem = malloc(n);
+//
+//    printf("Input data >> ");
+//    for (int i = 0; i < n; i++)
+//        scanf("%hhd", mem + i);
+//
+//    int s, t, b, E;
+//    printf("s t b E: ");
+//    scanf("%d %d %d %d", &s, &t, &b, &E);
+//
+//    cache_t cache = initialize_cache(s, t, b, E);
+//
+//    // Perform write operations
+//    while (1) {
+//        scanf("%d", &n);
+//        if (n < 0) break;
+//        write_byte(cache, mem, n, 10); // Write the value 10 at memory address n
+//    }
+//
+//    printf("\nCache after write operations:\n");
+//    print_cache(cache);
+//
+//    free(mem);
+//    return 0;
 }
 
