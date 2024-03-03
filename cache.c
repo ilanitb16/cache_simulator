@@ -132,7 +132,6 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
 }
 
 void write_byte(cache_t cache, uchar* start, long int off, uchar new) {
-    // Implementation of write_byte function
     // Tag and index for the memory reference
     unsigned long int tag = off >> (cache.s + cache.b);
     unsigned long int address_without_offset = off / (1 << cache.b);
@@ -140,24 +139,27 @@ void write_byte(cache_t cache, uchar* start, long int off, uchar new) {
 
     // Search for the cache line matching the index
     cache_line_t* cache_line = cache.cache[index];
+
+    // Check if the data is already in the cache
     for (int i = 0; i < cache.E; i++) {
         // If cache line is valid and its tag matches the extracted tag
         if (cache_line[i].valid && cache_line[i].tag == tag) {
             // Cache hit
-            cache_line[i].frequency++;
+            cache_line[i].block[off % (1 << cache.b)] = new; // Update the cache block with the new data
+            cache_line[i].frequency++; // Increase the frequency
 
-            // Update the data in memory
+            // Write the new data into memory (write-through)
             start[off] = new;
-            return;
+
+            return; // Exit the function
         }
     }
 
-    // If the data is not in the cache, update the cache using the LFU method
+    // If the data is not in the cache, update the cache using the LFU method (write allocate)
     update_lfu(cache_line, cache.E, tag, off, new, cache.b);
 
-    // Write the new data into memory
+    // Write the new data into memory (write-through)
     start[off] = new;
-
 }
 
 void print_cache(cache_t cache) {
