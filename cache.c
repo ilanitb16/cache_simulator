@@ -55,7 +55,12 @@ void update_lfu(cache_line_t* cache_line, int cache_E, unsigned long int tag, lo
     least_freq_cache_line->valid = 1;
     least_freq_cache_line->frequency++;
     least_freq_cache_line->tag = tag;
-    least_freq_cache_line->block = (uchar*)malloc((1 << b) * sizeof(uchar));
+    // least_freq_cache_line->block = (uchar*)malloc((1 << b) * sizeof(uchar));
+
+    // Allocate memory for the block if it's not already allocated
+    if (least_freq_cache_line->block == NULL) {
+        least_freq_cache_line->block = (uchar*)malloc((1 << b) * sizeof(uchar));
+    }
     least_freq_cache_line->block[off % (1 << b)] = data; // Update the block with the data
 }
 
@@ -78,11 +83,11 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
     // Firstly we must determine if this memory reference causes a miss.
 
     // off >> (cache.s + cache.b) : shift memory address off to the right by cache.s + cache.b bits
-    unsigned long int tag = off >> (cache.s + cache.b); //  Get the tag and the index from the address.
+   unsigned long int tag = off >> (cache.s + cache.b); //  Get the tag and the index from the address.
+
 
     // Determine the index for this memory reference. This determines
     // the set where the requested word *could* be.
-
 
     unsigned long int address_without_offset = off / (1 << cache.b); //div by size of block 2^b. left with index+tag bits
     unsigned long int index = address_without_offset % (1 << cache.s); // divide by size of set 2^s
@@ -93,8 +98,21 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
     for (int i = 0; i < cache.E; i++) {
         // If cache line is valid and its tag matches the extracted tag
         if (cache_line[i].valid && cache_line[i].tag == tag) {
+            // Cache hit
+            uchar cached_data = cache_line[i].block[off % (1 << cache.b)];
+            uchar expected_data = start[off]; // Data expected from memory
+
+            // Compare the data from cache with expected data from memory
+            if (cached_data != expected_data) {
+                // Data in cache doesn't match the expected data
+                // Update the cache block with the correct data from memory
+                cache_line[i].block[off % (1 << cache.b)] = expected_data;
+            }
+
+            cache_line[i].frequency++;
+
             // Return the data from the cache
-            return cache_line[i].block[off % (1 << cache.b)];
+            return cached_data;
         }
     }
 
@@ -124,6 +142,30 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
 
 void write_byte(cache_t cache, uchar* start, long int off, uchar new) {
     // Implementation of write_byte function
+    // Determine the tag and index for the memory reference
+    unsigned long int tag = off >> (cache.s + cache.b);
+    unsigned long int address_without_offset = off / (1 << cache.b);
+    unsigned long int index = address_without_offset % (1 << cache.s);
+
+    // Search for the cache line corresponding to the index
+    cache_line_t* cache_line = cache.cache[index];
+
+    // Check if the data is already in the cache
+    for (int i = 0; i < cache.E; i++) {
+        if (cache_line[i].valid && cache_line[i].tag == tag) {
+            // Update the block in the cache with the new data
+            cache_line[i].block[off % (1 << cache.b)] = new;
+            // Write the new data into memory
+            start[off] = new;
+            return; // Exit the function after updating the cache and memory
+        }
+    }
+
+    // If the data is not in the cache, update the cache using the LFU method
+    update_lfu(cache_line, cache.E, tag, off, new, cache.b);
+
+    // Write the new data into memory
+    start[off] = new;
 }
 
 void print_cache(cache_t cache) {
@@ -148,10 +190,18 @@ int main (){
     uchar arr[] = {1, 2, 3, 4, 5, 6, 7, 8};
     cache_t cache = initialize_cache(1, 1, 1, 2);
     read_byte(cache, arr, 0);
+   // print_cache(cache);
     read_byte(cache, arr, 1);
+    print_cache(cache);
     read_byte(cache, arr, 2);
+    //print_cache(cache);
+
     read_byte(cache, arr, 6);
+   // print_cache(cache);
+
     read_byte(cache, arr, 7);
+
+
     print_cache(cache);
 }
 
