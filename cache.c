@@ -179,67 +179,113 @@ void print_cache(cache_t cache) {
     }
 }
 
-int main (){
-    // data
-    uchar arr[] = {1, 2, 3, 4, 5, 6, 7, 8};
-    cache_t cache = initialize_cache(1, 1, 1, 2);
-    read_byte(cache, arr, 0);
-    read_byte(cache, arr, 1);
-    read_byte(cache, arr, 2);
-    read_byte(cache, arr, 6);
-    read_byte(cache, arr, 7);
-    print_cache(cache);
+int main() {
+     int n;
+     printf("Size of data: ");
+     scanf("%d", &n);
+     uchar* mem = malloc(n);
+     printf("Input data >> ");
+     for (int i = 0; i < n; i++)
+         scanf("%hhd", mem + i);
 
-//    int n;
-//     printf("Size of data: ");
-//     scanf("%d", &n);
-//     uchar* mem = malloc(n);
-//     printf("Input data >> ");
-//     for (int i = 0; i < n; i++)
-//         scanf("%hhd", mem + i);
-//
-//     int s, t, b, E;
-//     printf("s t b E: ");
-//     scanf("%d %d %d %d", &s, &t, &b, &E);
-//     cache_t cache = initialize_cache(s, t, b, E);
-//
-//     while (1) {
-//         scanf("%d", &n);
-//         if (n < 0) break;
-//         read_byte(cache, mem, n);
-//         }
-//
-//     puts("");
-//     print_cache(cache);
-//
-//     free(mem);
+     int s, t, b, E;
+     printf("s t b E: ");
+     scanf("%d %d %d %d", &s, &t, &b, &E);
+     cache_t cache = initialize_cache(s, t, b, E);
 
-//    int n;
-//    printf("Size of data: ");
-//    scanf("%d", &n);
-//    uchar* mem = malloc(n);
+     while (1) {
+         scanf("%d", &n);
+         if (n < 0) break;
+         read_byte(cache, mem, n);
+         }
+
+     puts("");
+     print_cache(cache);
+
+     free(mem);
+}
+
+
+//int main (){
+//    // data
+//    uchar arr[] = {1, 2, 3, 4, 5, 6, 7, 8};
+//    // cache_t cache = initialize_cache(1, 1, 1, 2);
+////    read_byte(cache, arr, 0);
+////    read_byte(cache, arr, 1);
+////    read_byte(cache, arr, 2);
+////    read_byte(cache, arr, 6);
+////    read_byte(cache, arr, 7);
+////    print_cache(cache);
 //
-//    printf("Input data >> ");
-//    for (int i = 0; i < n; i++)
-//        scanf("%hhd", mem + i);
+//    cache_t cache = initialize_cache(1, 1, 1, 1);
+//    read_byte(cache, arr, 0);
+//    read_byte(cache, arr, 1);
+//    read_byte(cache, arr, 0);
+//    read_byte(cache, arr, 1);
+//    read_byte(cache, arr, 2);
+//    read_byte(cache, arr, 3);
+//    read_byte(cache, arr, 4);
+//    read_byte(cache, arr, 2);
+//    read_byte(cache, arr, 3);
+//    read_byte(cache, arr, 5);
+//    read_byte(cache, arr, 6);
+//    read_byte(cache, arr, 7);
+//    read_byte(cache, arr, 1);
+//    read_byte(cache, arr, 0);
+//    read_byte(cache, arr, 4);
 //
-//    int s, t, b, E;
-//    printf("s t b E: ");
-//    scanf("%d %d %d %d", &s, &t, &b, &E);
-//
-//    cache_t cache = initialize_cache(s, t, b, E);
-//
-//    // Perform write operations
-//    while (1) {
-//        scanf("%d", &n);
-//        if (n < 0) break;
-//        write_byte(cache, mem, n, 10); // Write the value 10 at memory address n
-//    }
-//
-//    printf("\nCache after write operations:\n");
 //    print_cache(cache);
 //
-//    free(mem);
-//    return 0;
-}
+////    int n;
+////     printf("Size of data: ");
+////     scanf("%d", &n);
+////     uchar* mem = malloc(n);
+////     printf("Input data >> ");
+////     for (int i = 0; i < n; i++)
+////         scanf("%hhd", mem + i);
+////
+////     int s, t, b, E;
+////     printf("s t b E: ");
+////     scanf("%d %d %d %d", &s, &t, &b, &E);
+////     cache_t cache = initialize_cache(s, t, b, E);
+////
+////     while (1) {
+////         scanf("%d", &n);
+////         if (n < 0) break;
+////         read_byte(cache, mem, n);
+////         }
+////
+////     puts("");
+////     print_cache(cache);
+////
+////     free(mem);
+//
+////    int n;
+////    printf("Size of data: ");
+////    scanf("%d", &n);
+////    uchar* mem = malloc(n);
+////
+////    printf("Input data >> ");
+////    for (int i = 0; i < n; i++)
+////        scanf("%hhd", mem + i);
+////
+////    int s, t, b, E;
+////    printf("s t b E: ");
+////    scanf("%d %d %d %d", &s, &t, &b, &E);
+////
+////    cache_t cache = initialize_cache(s, t, b, E);
+////
+////    // Perform write operations
+////    while (1) {
+////        scanf("%d", &n);
+////        if (n < 0) break;
+////        write_byte(cache, mem, n, 10); // Write the value 10 at memory address n
+////    }
+////
+////    printf("\nCache after write operations:\n");
+////    print_cache(cache);
+////
+////    free(mem);
+////    return 0;
+//}
 
