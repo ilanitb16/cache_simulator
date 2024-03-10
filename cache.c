@@ -97,7 +97,7 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
     cache_line_t* cache_line = cache.cache[index]; // Search for the cache line matching the index
     for (int i = 0; i < cache.E; i++) {
         // If cache line is valid and its tag matches the extracted tag
-        if (cache_line[i].valid && cache_line[i].tag == tag) {
+        if (cache_line[i].valid && (unsigned long int)cache_line[i].tag == tag) {
             // Cache hit
             uchar cached_data = cache_line[i].block[off % (1 << cache.b)];
              cache_line[i].frequency++;
@@ -144,7 +144,7 @@ void write_byte(cache_t cache, uchar* start, long int off, uchar new) {
     // Check if the data is already in the cache
     for (int i = 0; i < cache.E; i++) {
         // If cache line is valid and its tag matches the extracted tag
-        if (cache_line[i].valid && cache_line[i].tag == tag) {
+        if (cache_line[i].valid && (unsigned long int)cache_line[i].tag == tag) {
             // Cache hit
             cache_line[i].block[off % (1 << cache.b)] = new; // Update the cache block with the new data
             cache_line[i].frequency++; // Increase the frequency
