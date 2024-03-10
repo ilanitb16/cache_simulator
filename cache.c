@@ -52,7 +52,7 @@ void update_lfu(cache_line_t* cache_line, int cache_E, unsigned long int tag, lo
     // Update the cache line with the least frequently used one
     cache_line_t* least_freq_cache_line = &cache_line[min_frequency_index];
     least_freq_cache_line->valid = 1;
-    least_freq_cache_line->frequency++;
+    least_freq_cache_line->frequency = 1; // Initialize frequency to 1
     least_freq_cache_line->tag = tag;
     // least_freq_cache_line->block = (uchar*)malloc((1 << b) * sizeof(uchar));
 
@@ -77,6 +77,7 @@ int check_cold_miss(cache_line_t* cache_line, int cache_E) {
 }
 
 uchar read_byte(cache_t cache, uchar* start, long int off) {
+
     // off is the address that you insert into your cache
 
     // Firstly we must determine if this memory reference causes a miss.
@@ -89,6 +90,7 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
 
     unsigned long int address_without_offset = off / (1 << cache.b); //div by size of block 2^b. left with index+tag bits
     unsigned long int index = address_without_offset % (1 << cache.s); // divide by size of set 2^s
+ //   unsigned long int index = (off >> cache.b) & ((1 << cache.s) - 1);
 
     // Now that index and tag are known, determine if it is a hit/miss
 
@@ -98,8 +100,7 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
         if (cache_line[i].valid && cache_line[i].tag == tag) {
             // Cache hit
             uchar cached_data = cache_line[i].block[off % (1 << cache.b)];
-            cache_line[i].frequency++;
-
+             cache_line[i].frequency++;
             // Return the data from the cache
             return cached_data;
         }
@@ -207,16 +208,16 @@ int main() {
 
 
 //int main (){
-//    // data
+    // data
 //    uchar arr[] = {1, 2, 3, 4, 5, 6, 7, 8};
-//    // cache_t cache = initialize_cache(1, 1, 1, 2);
-////    read_byte(cache, arr, 0);
-////    read_byte(cache, arr, 1);
-////    read_byte(cache, arr, 2);
-////    read_byte(cache, arr, 6);
-////    read_byte(cache, arr, 7);
-////    print_cache(cache);
-//
+//     cache_t cache = initialize_cache(1, 1, 1, 2);
+//    read_byte(cache, arr, 0);
+//    read_byte(cache, arr, 1);
+//    read_byte(cache, arr, 2);
+//    read_byte(cache, arr, 6);
+//    read_byte(cache, arr, 7);
+//    print_cache(cache);
+
 //    cache_t cache = initialize_cache(1, 1, 1, 1);
 //    read_byte(cache, arr, 0);
 //    read_byte(cache, arr, 1);
@@ -233,59 +234,59 @@ int main() {
 //    read_byte(cache, arr, 1);
 //    read_byte(cache, arr, 0);
 //    read_byte(cache, arr, 4);
+
+//    print_cache(cache);
+
+//    int n;
+//     printf("Size of data: ");
+//     scanf("%d", &n);
+//     uchar* mem = malloc(n);
+//     printf("Input data >> ");
+//     for (int i = 0; i < n; i++)
+//         scanf("%hhd", mem + i);
 //
+//     int s, t, b, E;
+//     printf("s t b E: ");
+//     scanf("%d %d %d %d", &s, &t, &b, &E);
+//     cache_t cache = initialize_cache(s, t, b, E);
+//
+//     while (1) {
+//         scanf("%d", &n);
+//         if (n < 0) break;
+//         read_byte(cache, mem, n);
+//         }
+//
+//     puts("");
+//     print_cache(cache);
+//
+//     free(mem);
+
+//    int n;
+//    printf("Size of data: ");
+//    scanf("%d", &n);
+//    uchar* mem = malloc(n);
+//
+//    printf("Input data >> ");
+//    for (int i = 0; i < n; i++)
+//        scanf("%hhd", mem + i);
+//
+//    int s, t, b, E;
+//    printf("s t b E: ");
+//    scanf("%d %d %d %d", &s, &t, &b, &E);
+//
+//    cache_t cache = initialize_cache(s, t, b, E);
+//
+//    // Perform write operations
+//    while (1) {
+//        scanf("%d", &n);
+//        if (n < 0) break;
+//        write_byte(cache, mem, n, 10); // Write the value 10 at memory address n
+//    }
+//
+//    printf("\nCache after write operations:\n");
 //    print_cache(cache);
 //
-////    int n;
-////     printf("Size of data: ");
-////     scanf("%d", &n);
-////     uchar* mem = malloc(n);
-////     printf("Input data >> ");
-////     for (int i = 0; i < n; i++)
-////         scanf("%hhd", mem + i);
-////
-////     int s, t, b, E;
-////     printf("s t b E: ");
-////     scanf("%d %d %d %d", &s, &t, &b, &E);
-////     cache_t cache = initialize_cache(s, t, b, E);
-////
-////     while (1) {
-////         scanf("%d", &n);
-////         if (n < 0) break;
-////         read_byte(cache, mem, n);
-////         }
-////
-////     puts("");
-////     print_cache(cache);
-////
-////     free(mem);
-//
-////    int n;
-////    printf("Size of data: ");
-////    scanf("%d", &n);
-////    uchar* mem = malloc(n);
-////
-////    printf("Input data >> ");
-////    for (int i = 0; i < n; i++)
-////        scanf("%hhd", mem + i);
-////
-////    int s, t, b, E;
-////    printf("s t b E: ");
-////    scanf("%d %d %d %d", &s, &t, &b, &E);
-////
-////    cache_t cache = initialize_cache(s, t, b, E);
-////
-////    // Perform write operations
-////    while (1) {
-////        scanf("%d", &n);
-////        if (n < 0) break;
-////        write_byte(cache, mem, n, 10); // Write the value 10 at memory address n
-////    }
-////
-////    printf("\nCache after write operations:\n");
-////    print_cache(cache);
-////
-////    free(mem);
-////    return 0;
+//    free(mem);
+//    return 0;
 //}
 
