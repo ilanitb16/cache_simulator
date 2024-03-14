@@ -35,7 +35,7 @@ cache_t initialize_cache(uchar sets_exponent, uchar tag_length, uchar blocks_exp
     return cache;
 }
 
-void update_lfu(cache_line_t* cache_line, int cache_E, unsigned long int tag, long int off, uchar data, uchar b) {
+cache_line_t* update_lfu(cache_line_t* cache_line, int cache_E, unsigned long int tag, long int off, uchar data, uchar b) {
     // Choose the cache line with the least frequency
     // Update the cache with the data we got from start
     int min_frequency = INT_MAX;
@@ -61,6 +61,8 @@ void update_lfu(cache_line_t* cache_line, int cache_E, unsigned long int tag, lo
         least_freq_cache_line->block = (uchar*)malloc((1 << b) * sizeof(uchar));
     }
     least_freq_cache_line->block[off % (1 << b)] = data; // Update the block with the data
+
+    return least_freq_cache_line;
 }
 
 int check_cold_miss(cache_line_t* cache_line, int cache_E) {
@@ -93,11 +95,10 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
  //   unsigned long int index = (off >> cache.b) & ((1 << cache.s) - 1);
 
     // Now that index and tag are known, determine if it is a hit/miss
-
     cache_line_t* cache_line = cache.cache[index]; // Search for the cache line matching the index
     for (int i = 0; i < cache.E; i++) {
         // If cache line is valid and its tag matches the extracted tag
-        if (cache_line[i].valid && cache_line[i].tag == tag) {
+        if (cache_line[i].valid && (unsigned long int)cache_line[i].tag == tag) {
             // Cache hit
             uchar cached_data = cache_line[i].block[off % (1 << cache.b)];
              cache_line[i].frequency++;
@@ -106,9 +107,11 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
         }
     }
 
+    long int block_offset = off - (off % (1 << cache.b));
+
     // If we got here we have a cache miss and have to handle it using LFU method.
-    uchar data = start[off]; // Fetch the data from start (memory)
-    uchar data2 = start[off + 1];
+    uchar data = start[block_offset]; // Fetch the data from start (memory)
+    uchar data2 = start[block_offset + 1];
 
     // cold miss
     if ( 0 == check_cold_miss(cache_line, cache.E)) {
@@ -119,15 +122,23 @@ uchar read_byte(cache_t cache, uchar* start, long int off) {
                 cache_line[i].frequency = 1;
                 cache_line[i].tag = tag;
                 cache_line[i].block = (uchar *) malloc((1 << cache.b) * sizeof(uchar));
-                cache_line[i].block[off % (1 << cache.b)] = data;
-                cache_line[i].block[(off + 1) % (1 << cache.b)] = data2;
+
+                for(int j = 0; j< (1<< cache.b) ;j++){
+                    cache_line[i].block[j] = start[block_offset + j];
+                }
                 return data; // Return the fetched data
             }
         }
     }
 
-    update_lfu(cache_line, cache.E, tag, off, data, cache.b); // Update cache using LFU method
-    update_lfu(cache_line, cache.E, tag, off + 1, data2, cache.b);
+    cache_line_t* c = update_lfu(cache_line, cache.E, tag, block_offset, start[block_offset ], cache.b); // Update cache using LFU method
+    for(int j = 1; j< (1<< cache.b) ;j++){
+        c->block[j] =  start[block_offset + j];
+    }
+
+
+//    update_lfu(cache_line, cache.E, tag, off, data, cache.b); // Update cache using LFU method
+//    update_lfu(cache_line, cache.E, tag, off + 1, data2, cache.b);
 
     return data;
 }
@@ -144,7 +155,7 @@ void write_byte(cache_t cache, uchar* start, long int off, uchar new) {
     // Check if the data is already in the cache
     for (int i = 0; i < cache.E; i++) {
         // If cache line is valid and its tag matches the extracted tag
-        if (cache_line[i].valid && cache_line[i].tag == tag) {
+        if (cache_line[i].valid && (unsigned long int)cache_line[i].tag == tag) {
             // Cache hit
             cache_line[i].block[off % (1 << cache.b)] = new; // Update the cache block with the new data
             cache_line[i].frequency++; // Increase the frequency
@@ -198,7 +209,7 @@ int main() {
          scanf("%d", &n);
          if (n < 0) break;
          read_byte(cache, mem, n);
-         }
+     }
 
      puts("");
      print_cache(cache);
