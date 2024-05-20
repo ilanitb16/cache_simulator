@@ -4,6 +4,8 @@
 
 This repository contains code for simulating a cache memory system. The cache is implemented with support for read and write operations, as well as LFU (Least Frequently Used) replacement policy.
 Imnplemented for my Computer Architecture course in Bar Ilan University.
+![image](https://github.com/ilanitb16/cache_simulator/assets/97344492/7750200d-6348-429e-9363-66c12d967197)
+
 ## Features
 
 - **Read Operation**: Simulates a read operation from the cache. If the requested data is not present in the cache (cache miss), it fetches the data from main memory and updates the cache.
@@ -11,8 +13,6 @@ Imnplemented for my Computer Architecture course in Bar Ilan University.
 - **Cache Initialization**: Initializes the cache memory with the specified parameters such as sets, tag length, block size, and associativity.
 - **LFU Replacement Policy**: Implements the Least Frequently Used (LFU) replacement policy to evict cache blocks when the cache is full.
 - **Print Cache Contents**: Prints the contents of the cache memory for visualization and debugging purposes.
-
-## Usage
 
 ### Prerequisites
 
@@ -70,3 +70,5 @@ Set 1
 1 1 0x0 03 04 
 1 2 0x1 07 08 
 
+
+![image](https://github.com/ilanitb16/cache_simulator/assets/97344492/baa0fbd2-00eb-44f7-92c9-b96a923f6b64)
